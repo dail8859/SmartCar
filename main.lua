@@ -53,15 +53,15 @@ function luann:draw()
 end
 
 local sensors = {
-	{ Vector( 4, 9), Vector( 45,  10) * 2.0 },
-	{ Vector( 3, 9), Vector( 45,  50) * 2.0 },
-	{ Vector( 2, 9), Vector( 30, 100) * 2.0 },
-	{ Vector( 1, 9), Vector( 12, 125) * 2.0 },
-	-- { Vector( 0, 9), Vector(  0, 200) },
-	{ Vector(-1, 9), Vector(-12, 125) * 2.0 },
-	{ Vector(-2, 9), Vector(-30, 100) * 2.0 },
-	{ Vector(-3, 9), Vector(-45,  50) * 2.0 },
-	{ Vector(-4, 9), Vector(-45,  10) * 2.0 },
+	{ Vector( 4, 8), Vector( 45,  10) * 3.0 },
+	{ Vector( 3, 8), Vector( 45,  50) * 3.0 },
+	{ Vector( 2, 8), Vector( 30, 100) * 3.0 },
+	{ Vector( 1, 8), Vector( 12, 125) * 3.0 },
+	-- { Vector( 0, 8), Vector(  0, 200) * 3.0},
+	{ Vector(-1, 8), Vector(-12, 125) * 3.0 },
+	{ Vector(-2, 8), Vector(-30, 100) * 3.0 },
+	{ Vector(-3, 8), Vector(-45,  50) * 3.0 },
+	{ Vector(-4, 8), Vector(-45,  10) * 3.0 },
 }
 
 function map_range(a1, a2, b1, b2, s )
