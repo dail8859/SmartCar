@@ -1,3 +1,21 @@
+-- This file is part of SmartCar.
+-- 
+-- Copyright (C)2016 Justin Dailey <dail8859@yahoo.com>
+-- 
+-- SmartCar is free software; you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation; either
+-- version 2 of the License, or (at your option) any later version.
+-- 
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-- GNU General Public License for more details.
+-- 
+-- You should have received a copy of the GNU General Public License
+-- along with SmartCar.  If not, see <http://www.gnu.org/licenses/>..
+
+-- Most of this code was translated from:
 -- http://www.iforce2d.net/b2dtut/top-down-car
 
 require "Vector"
