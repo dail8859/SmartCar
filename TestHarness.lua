@@ -1,6 +1,5 @@
-local Car = require("Car")
+local SmartCar = require("SmartCar")
 local Track = require("Track")
-local luann = require("luann")
 
 local TestHarness = {}
 
@@ -9,11 +8,9 @@ function TestHarness:new(sensors, inputCallback)
 
 	harness.world = love.physics.newWorld(0, 0, true)
 	harness.track = Track:new(harness.world)
-	harness.car = Car:new(harness.world)
-	harness.sensors = sensors
+	harness.cars = {}
+	harness.cars[1] = SmartCar:new(harness.world, sensors, inputCallback)
 	harness.isDone = false
-	harness.inputCallback = inputCallback
-	harness.totalTime = 0.0
 	harness.positions = {}
 
 	--local destroyFix = nil
@@ -46,14 +43,14 @@ function TestHarness:new(sensors, inputCallback)
 end
 
 function TestHarness:destroy()
-	self.inputCallback = nil
 	self.positions = nil
-	self.sensors = nil
 
 	self.track:destroy()
 	self.track = nil
-	self.car:destroy()
-	self.car = nil
+	for _, car in ipairs(self.cars) do
+		car:destroy()
+	end
+	self.cars = nil
 	self.world:setCallbacks(nil, nil, nil, nil)
 	self.world:destroy()
 	self.world = nil
@@ -67,23 +64,14 @@ function TestHarness:draw()
 	love.graphics.translate(w / 2, h / 2)
 
 	-- Move to the car's location
-	local x, y = self.car.body:getWorldCenter()
+	local x, y = self.cars[1].body:getWorldCenter()
 	love.graphics.translate(-x * scale, -y * scale) -- why negative?
 
 	-- Draw stuff
-	self.car:draw()
-	self.track:draw()
-
-	for _, sensor in ipairs(self.sensors) do
-		local v1 = Vector(self.car.body:getWorldPoint(sensor[1]:unpack()))
-		local v2 = sensor.hit or Vector(self.car.body:getWorldPoint(sensor[2]:unpack()))
-		love.graphics.setColor(255, 255, 255, 90)
-		love.graphics.line(v1.x * scale, v1.y * scale, v2.x * scale, v2.y * scale)
-		if sensor.hit then
-			love.graphics.setPointSize(5)
-			love.graphics.points(sensor.hit.x * scale, sensor.hit.y * scale)
-		end
+	for _, car in ipairs(self.cars) do
+		car:draw()
 	end
+	self.track:draw()
 
 	for _, point in ipairs(self.positions) do
 		love.graphics.points(point.x, point.y)
@@ -92,7 +80,7 @@ function TestHarness:draw()
 end
 
 function TestHarness:savePosition()
-	local x, y = self.car.body:getWorldCenter()
+	local x, y = self.cars[1].body:getWorldCenter()
 	self.positions[#self.positions + 1] = Vector(x * scale, y * scale)
 end
 
@@ -118,15 +106,15 @@ function TestHarness:isStalled()
 end
 
 function TestHarness:isGoingBackwards()
-	if #self.positions > 4 then
-		print(Vector(self.car.body:getWorldCenter()))
-		print(self.positions[#self.positions - 4])
+	-- if #self.positions > 4 then
+		-- print(Vector(self.car.body:getWorldCenter()))
+		-- print(self.positions[#self.positions - 4])
 		-- local a = self.positions[#self.positions - 4] - (Vector(self.car.body:getWorldCenter()) * scale)
 		-- local vel = Vector(self.car.body:getLinearVelocity())
 		-- local ang = self.car.body:getAngle()
 		-- print(math.abs(math.deg(a:angle())))
 		-- print(math.deg(ang))
-	end
+	-- end
 
 	return false
 end
@@ -152,24 +140,10 @@ function TestHarness:update(tick)
 		return true
 	end
 
-	-- Check the sensors
-	local sensor_inputs = {}
-	for i, sensor in ipairs(self.sensors) do
-		local v1 = Vector(self.car.body:getWorldPoint(sensor[1]:unpack()))
-		local v2 = Vector(self.car.body:getWorldPoint(sensor[2]:unpack()))
-		local closest = 1.0
-		sensor.hit = nil
-		self.world:rayCast(v1.x, v1.y, v2.x, v2.y, function(fixture, x, y, xn, yn, fraction)
-			if fixture:getUserData() ~= true then return 1 end
-			closest = fraction
-			sensor.hit = Vector(x, y)
-			return fraction
-		end)
-		sensor_inputs[i] = closest
+	-- Update the cars
+	for _, car in ipairs(self.cars) do
+		car:update()
 	end
-
-	-- Pass the sensor data to the callback func to see what the car should do
-	self.car:update(self.inputCallback(sensor_inputs))
 
 	return false
 end

@@ -1,5 +1,5 @@
-local Car = require("Car")
 local Track = require("Track")
+local SmartCar = require("SmartCar")
 local luann = require("luann")
 local TestHarness = require("TestHarness")
 local debugGraph = require("debugGraph")
@@ -53,15 +53,15 @@ function luann:draw()
 end
 
 local sensors = {
-	{ Vector( 4, 8), Vector( 45,  10) * 3.0 },
-	{ Vector( 3, 8), Vector( 45,  50) * 3.0 },
-	{ Vector( 2, 8), Vector( 30, 100) * 3.0 },
-	{ Vector( 1, 8), Vector( 12, 125) * 3.0 },
-	-- { Vector( 0, 8), Vector(  0, 200) * 3.0},
-	{ Vector(-1, 8), Vector(-12, 125) * 3.0 },
-	{ Vector(-2, 8), Vector(-30, 100) * 3.0 },
-	{ Vector(-3, 8), Vector(-45,  50) * 3.0 },
-	{ Vector(-4, 8), Vector(-45,  10) * 3.0 },
+	{ Vector( 4, 10), Vector( 45,  10) * 3.0 },
+	{ Vector( 3, 10), Vector( 45,  50) * 3.0 },
+	{ Vector( 2, 10), Vector( 30, 100) * 3.0 },
+	{ Vector( 1, 10), Vector( 12, 125) * 3.0 },
+	-- { Vector( 0, 10), Vector(  0, 200) * 3.0},
+	{ Vector(-1, 10), Vector(-12, 125) * 3.0 },
+	{ Vector(-2, 10), Vector(-30, 100) * 3.0 },
+	{ Vector(-3, 10), Vector(-45,  50) * 3.0 },
+	{ Vector(-4, 10), Vector(-45,  10) * 3.0 },
 }
 
 function map_range(a1, a2, b1, b2, s )
@@ -90,7 +90,7 @@ function love.draw()
 	love.graphics.setColor(0, 255, 0)
 	dtGraph:draw()
 
-	local _, brain = debug.getupvalue(th.inputCallback, 1)
+	local _, brain = debug.getupvalue(th.cars[1].inputCallback, 1)
 
 	th:draw()
 	if not brain then return end
@@ -147,6 +147,7 @@ end
 
 function getNewANNBrain()
 	local network = luann:new({#sensors, 16, 2}, 5, 1)
+	-- Give it a few data points to start it in the right direction
 	network:bp({1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, {0.6, 0.5})
 	network:bp({1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, {0.6, 0.5})
 	network:bp({1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, {0.6, 0.5})
@@ -176,6 +177,7 @@ function getNewANNBrain()
 		return up, down, left, right
 	end
 end
+
 tick = 0
 function love.update(dt)
 	tick = tick + 1
@@ -192,7 +194,7 @@ function love.quit()
 	end
 end
 
-function cross_breed(braina, brainb)
+function cross_breed(braina, brainb, mutate_rate)
 	local child = luann:new({#sensors, 16, 2}, 5, 1)
 
 	for layer_num = 1, #child do
@@ -204,8 +206,8 @@ function cross_breed(braina, brainb)
 				else
 					new_weight = brainb[layer_num].cells[cell_num].weights[weight_num]
 				end
-    
-				if math.random() < 0.05 then
+
+				if math.random() < (mutate_rate or 0.05) then
 					new_weight = new_weight + math.random() * 4 - 2 -- mutate
 				end
 				child[layer_num].cells[cell_num].weights[weight_num] = new_weight
@@ -236,7 +238,7 @@ function testPopulation()
 			t = t + 1
 		end
 		-- Do brain surgery and save the brain and fitness
-		brains[#brains + 1] = { func = h.inputCallback, fitness = h:computeFitness() }
+		brains[#brains + 1] = { func = h.cars[1].inputCallback, fitness = h:computeFitness() }
 		--if h:computeFitness() > 2300.0 then break end
 		h:destroy()
 		h = nil
@@ -266,5 +268,12 @@ function love.keypressed(key)
 	elseif key == 'a' then
 		testPopulation()
 		tick = 0
+	elseif key == 'b' then
+		local _, brain = debug.getupvalue(th.cars[1].inputCallback, 1)
+		local b = getNewANNBrain()
+		debug.setupvalue(b, 1, cross_breed(brain, brain, -0.01))
+		th.cars[#th.cars + 1] = SmartCar:new(th.world, sensors, th.cars[1].inputCallback)
+		--testPopulation()
+		--tick = 0
 	end
 end

@@ -40,7 +40,7 @@ function debugGraph:new(type, x, y, width, height, delay, label, font)
     height = height or 30, -- Graph height
     delay = delay or 0.5, -- Update delay
     label = label or type, -- Graph label
-    font = font or love.graphics.newFont(8),
+    font = font or love.graphics.newFont(10),
     data = {},
     _max = 0,
     _time = 0,

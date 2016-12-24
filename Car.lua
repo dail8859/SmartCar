@@ -23,7 +23,7 @@ function Car:new(world)
 	)
 	car.fixture = love.physics.newFixture(car.body, car.shape, 0.1)
 	car.fixture:setFriction(1.0)
-	car.fixture:setUserData(function() car.isBroken = true end)
+	--car.fixture:setUserData(function() car.isBroken = true end)
 
 	local maxForwardSpeed = 300
 	local maxBackwardSpeed = -100
@@ -50,8 +50,7 @@ function Car:new(world)
 		car.wheels[i].origPos = Vector(tire.body:getX(), tire.body:getY())
 		car.wheels[i].tire = tire
 		car.wheels[i].joint = joint
-		tire.fixture:setUserData(function() car:removeTire(joint) end)
-		--tire.fixture:setUserData(function() print(i) end)
+		--tire.fixture:setUserData(function() car:removeTire(joint) end)
 	end
 
 	car.wheels[1].isSteerable = true
